@@ -2,6 +2,7 @@ import numpy as np
 
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.quantum_info.operators import Operator, Pauli
+from qiskit.quantum_info.operators.channel import Chi, PTM
 
 import scipy.sparse as SS
 
@@ -14,22 +15,25 @@ np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
 
 pauliList = ["I","X","Y","Z"]
 
-conjII = np.eye(4)
+conjII = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
 conjIX = np.array([[0,1,0,0],[1,0,0,0],[0,0,0,1j],[0,0,-1j,0]])
 conjIY = np.array([[0,0,1,0],[0,0,0,-1j],[1,0,0,0],[0,1j,0,0]])
 conjIZ = np.array([[0,0,0,1],[0,0,1j,0],[0,-1j,0,0],[1,0,0,0]])
+
 conjXI = np.array([[0,1,0,0],[1,0,0,0],[0,0,0,-1j],[0,0,1j,0]])
-conjXX = np.eye(4)
-conjXY = np.array([[0,0,0,-1j],[0,1,0,0],[0,0,1,0],[1j,0,0,0]])
+conjXX = np.array([[1,0,0,0],[0,1,0,0],[0,0,-1,0],[0,0,0,-1]])
+conjXY = np.array([[0,0,0,-1j],[0,0,1,0],[0,1,0,0],[1j,0,0,0]])
 conjXZ = np.array([[0,0,1j,0],[0,0,0,1],[-1j,0,0,0],[0,1,0,0]])
+
 conjYI = np.array([[0,0,1,0],[0,0,0,1j],[1,0,0,0],[0,-1j,0,0]])
-conjYX = np.array([[0,0,0,1j],[0,1,0,0],[0,0,1,0],[-1j,0,0,0]])
-conjYY = np.eye(4)
+conjYX = np.array([[0,0,0,1j],[0,0,1,0],[0,1,0,0],[-1j,0,0,0]])
+conjYY = np.array([[1,0,0,0],[0,-1,0,0],[0,0,1,0],[0,0,0,-1]])
 conjYZ = np.array([[0,-1j,0,0],[1j,0,0,0],[0,0,0,1],[0,0,1,0]])
-conjZI = np.array([[0,0,0,1],[0,-1j,0,0],[0,0,1j,0],[1,0,0,0]])
+
+conjZI = np.array([[0,0,0,1],[0,0,-1j,0],[0,1j,0,0],[1,0,0,0]])
 conjZX = np.array([[0,0,-1j,0],[0,0,0,1],[1j,0,0,0],[0,1,0,0]])
 conjZY = np.array([[0,1j,0,0],[-1j,0,0,0],[0,0,0,1],[0,0,1,0]])
-conjZZ = np.eye(4)
+conjZZ = np.array([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]])
 
 single_conjugation = {"II":conjII,
 						"IX":conjIX,
@@ -68,12 +72,17 @@ def PTM_Chi(matrix):
 				if debug: print("i,j",i,j)
 				rest = matrix[i*sliceDim:(i+1)*sliceDim,j*sliceDim:(j+1)*sliceDim]
 				PTMsc = single_conjugation[pauliIndI+pauliIndJ]
+				if debug: print(PTMsc)
 				PTMrc = PTM_Chi(rest)
-				PTM += np.reshape(np.tensordot(PTMsc,PTMrc,axes=0),(PTMdim,PTMdim))
-				del PTMrc,PTMsc						
+				PTM += np.kron(PTMsc,PTMrc)
+				if debug: print(np.array_str(PTM, precision=1))
+				del PTMrc,PTMsc
 	return PTM
 
 if __name__ == "__main__":
 	qDim = 5
-	data1 = TM.diagRandom(4**qDim)
+	data1 = TM.denseRandom(4**qDim)
 	mat = PTM_Chi(data1)
+	Chi = Chi(data1)
+	mat2 = PTM(Chi).data
+	print(np.array_str(4**(qDim/2)*mat2-mat, precision=1))

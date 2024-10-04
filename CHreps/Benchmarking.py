@@ -5,7 +5,6 @@ import time
 
 import matplotlib.pyplot as plt
 
-import TBD as TBD
 import ExampleMatrizes as EM
 import transformations as trafo
 	
@@ -13,7 +12,7 @@ import transformations as trafo
 Reps = ["Choi","SuperOp","Operator","Kraus","Chi","PTM","Stinespring"]
 to = {"Choi" : trafo._to_choi, "SuperOp" : trafo._to_superop, "Kraus" : trafo._to_kraus, "PTM" : trafo._to_ptm, "Stinespring" : trafo._to_stinespring, "Chi" : trafo._to_chi}
 
-Test = ["PTM","Choi"]
+Test = ["PTM","Chi"]
 
 def numKrauss(qDim):
 	# Smaller than qDim**2-1
@@ -25,7 +24,7 @@ if __name__ == "__main__":
 	From = Test[1]
 	To = Test[0]
 	for qDim in range(1,maxQdim):
-		if From == "SuperOp" or From == "Choi":
+		if From == "SuperOp" or From == "Choi" or From == "Chi":
 			data = EM.denseRandom(4**qDim)
 		if From == "Kraus":
 			k = numKrauss(qDim)
@@ -33,9 +32,11 @@ if __name__ == "__main__":
 		start_time = timeit.default_timer()
 		to[To](From,data,2**qDim,2**qDim)
 		times.append(timeit.default_timer() - start_time)
+		if qDim > 1: print(f"{qDim} & {times[-1]} & {times[-1]/times[-2]} \\\\")
 	
 	fig, ax = plt.subplots()
 	ax.scatter(range(1,maxQdim),times)
+	ax.set_ylim([10**(-6), 10**2])
 	ax.set_yscale('log')
 	ax.set_title(f"{From} to {To}")
 	plt.savefig(f"PlotsCHReps/{From}to{To}.png",dpi=150)

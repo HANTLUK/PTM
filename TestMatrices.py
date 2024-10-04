@@ -9,7 +9,7 @@ def denseRandom(dim):
 def identityMatrix(dim):
 	return np.identity(dim)
 def sparseRandom(dim):
-	return sp.random(dim,dim,density=1./dim,format="csr")
+	return sp.random(dim,dim,density=1./dim,format="csr").todense()
 def symmRandom(dim):
 	rand = randomMatrix(dim)
 	return np.add(rand,np.transpose(rand))

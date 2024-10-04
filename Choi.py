@@ -23,6 +23,7 @@ def PTM_Choi(matrix, midDim=None):
 	qBitDim = math.ceil(np.log(matDim)/np.log(2))
 	halfDim = int(2**(qBitDim-1))
 	
+    # Flag for recursion start
 	flag1 = False
 	if midDim is None:
 		flag1 = True
@@ -39,7 +40,34 @@ def PTM_Choi(matrix, midDim=None):
 	# Calculates the tensor product coefficients via the sliced submatrices.
 	# If one of these components is zero that coefficient is ignored.
 
-	if qBitDim > 0:
+    if halfDim > midDim:
+        
+        coeff1 = (matrix[0:halfDim, 0:halfDim]
+						+ matrix[halfDim:, halfDim:])
+		coeffX = (matrix[halfDim:, 0:halfDim]
+						-1.j*matrix[0:halfDim, halfDim:])
+		coeffY = (matrix[halfDim:, 0:halfDim]
+						+1.j*matrix[0:halfDim, halfDim:])
+		coeffZ = (matrix[0:halfDim, 0:halfDim]
+						- matrix[halfDim:, halfDim:])
+
+		coefficients = {"I": coeff1, "X": coeffX, "Y": coeffY, "Z": coeffZ}
+		del matrix
+
+		# Recursion for the Submatrices
+
+		for i,c in enumerate(coefficients):
+			mat = coefficients[c]
+			if mat.any() != 0:
+				subDec = PTM_Choi(mat,midDim)
+			else:
+				subDec = [[0. for _ in range(int(midDim**2))] for i in range(int(matDim**2/midDim**2))]
+			if halfDim == midDim:
+				decomposition.append(subDec)
+			else:
+				decomposition.extend(subDec)
+
+	elif qBitDim > 0:
 
 		coeff1 = 0.5*(matrix[0:halfDim, 0:halfDim]
 						+ matrix[halfDim:, halfDim:])
@@ -60,10 +88,7 @@ def PTM_Choi(matrix, midDim=None):
 			if mat.any() != 0:
 				subDec = PTM_Choi(mat,midDim)
 			else:
-				if halfDim > midDim:
-					subDec = [[0. for _ in range(int(midDim**2))] for i in range(int(matDim**2/midDim**2))]
-				else:
-					subDec = [0. for _ in range(int(halfDim**2))]
+				subDec = [0. for _ in range(int(halfDim**2))]
 			if halfDim == midDim:
 				decomposition.append(subDec)
 			else:
@@ -71,6 +96,7 @@ def PTM_Choi(matrix, midDim=None):
 
 	if flag1:
 		return np.array(decomposition)
+
 	return decomposition
 
 if __name__ == "__main__":
