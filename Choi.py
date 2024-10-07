@@ -10,6 +10,8 @@ import TestMatrices as TM
 
 from PTM_utils import matrix_slice, matrix_embedding
 
+from qiskit.quantum_info.operators.channel import Choi, PTM
+
 import sys
 np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
 
@@ -22,15 +24,15 @@ def PTM_Choi(matrix, midDim=None):
 	matDim = matrix.shape[0]
 	qBitDim = math.ceil(np.log(matDim)/np.log(2))
 	halfDim = int(2**(qBitDim-1))
-	
-    # Flag for recursion start
+
+	# Flag for recursion start
 	flag1 = False
 	if midDim is None:
 		flag1 = True
 		midDim = int(2**(qBitDim/2))
 
 	decomposition = []
-	
+
 	# Output for dimension 1
 
 	if qBitDim == 0:
@@ -40,14 +42,14 @@ def PTM_Choi(matrix, midDim=None):
 	# Calculates the tensor product coefficients via the sliced submatrices.
 	# If one of these components is zero that coefficient is ignored.
 
-    if halfDim > midDim:
-        
-        coeff1 = (matrix[0:halfDim, 0:halfDim]
+	if halfDim >= midDim:
+
+		coeff1 = (matrix[0:halfDim, 0:halfDim]
 						+ matrix[halfDim:, halfDim:])
 		coeffX = (matrix[halfDim:, 0:halfDim]
+						+matrix[0:halfDim, halfDim:])
+		coeffY = (1.j*matrix[halfDim:, 0:halfDim]
 						-1.j*matrix[0:halfDim, halfDim:])
-		coeffY = (matrix[halfDim:, 0:halfDim]
-						+1.j*matrix[0:halfDim, halfDim:])
 		coeffZ = (matrix[0:halfDim, 0:halfDim]
 						- matrix[halfDim:, halfDim:])
 
@@ -95,11 +97,17 @@ def PTM_Choi(matrix, midDim=None):
 				decomposition.extend(subDec)	
 
 	if flag1:
-		return np.array(decomposition)
+		return np.array(decomposition).transpose()
 
 	return decomposition
 
 if __name__ == "__main__":
-	qDim = 6
-	mat = TM.diagRandom(4**qDim)
-	PTM = PTM_Choi(mat)
+	qDim = 2
+	data = TM.denseRandom(4**qDim)
+	mat = PTM_Choi(data)
+
+	ChoiMat = Choi(data)
+	mat2 = PTM(ChoiMat).data
+	print("mat\n",np.array_str(mat, precision=1))
+	print("mat2\n",np.array_str(mat2, precision=1))
+	print("dif\n",np.array_str(mat2-mat, precision=1))

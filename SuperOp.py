@@ -20,7 +20,6 @@ np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
 def PTM_SuperOp(matrix):
 	debug = False
 	matDim = matrix.shape[0]
-	
 	PTM = np.zeros((matDim,matDim),dtype=np.complex64)
 	for i in range(matDim):
 		if debug: print(f"\n Row {i}, TPD")	
@@ -41,7 +40,7 @@ if __name__ == "__main__":
 	data = TM.denseRandom(4**qDim)
 	print(np.array_str(data, precision=1))
 	mat = PTM_SuperOp(data)
-	
+
 	SOp = SuperOp(data)
 	mat2 = PTM(SOp).data
 	print("dif\n",np.array_str(mat2-mat, precision=1))
