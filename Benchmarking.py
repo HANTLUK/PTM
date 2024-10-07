@@ -10,13 +10,14 @@ from Commutator import PTM_commutator,PTM_anticommutator
 from Multiplication import PTM_multiplication
 from Conjugation import PTM_conjugation
 from Chi import PTM_Chi
+from SuperOp import PTM_SuperOp
 # from Choi import PTM_Choi
 from PTM_utils import matrix_slice
 import TestMatrices as TM
 
-maps = {"Commutator" : PTM_commutator, "Anticommutator" : PTM_anticommutator, "Multiplication" : PTM_multiplication, "Conjugation" : PTM_conjugation,"Slicing":matrix_slice,"Chi":PTM_Chi}
+maps = {"Commutator" : PTM_commutator, "Anticommutator" : PTM_anticommutator, "Multiplication" : PTM_multiplication, "Conjugation" : PTM_conjugation,"Slicing":matrix_slice,"Chi":PTM_Chi, "SuperOp": PTM_SuperOp}
 matrizes = {"Diag":TM.diagRandom,"Dense":TM.denseRandom,"Id":TM.identityMatrix}
-maxQdims = {"Commutator" : 7, "Anticommutator" : 7, "Multiplication" : 7, "Conjugation" : 5, "Slicing": 14, "Chi" : 7}
+maxQdims = {"Commutator" : 7, "Anticommutator" : 7, "Multiplication" : 7, "Conjugation" : 5, "Slicing": 14, "Chi" : 7, "SuperOp": 7}
 
 def benchmark(matrixType,mapType,maxQdim,SOp=False):
 	output = True
@@ -44,7 +45,7 @@ if __name__ == "__main__":
 	matrixTypes = ["Diag","Dense"]
 	mapTypes = []
 #	 ["Commutator","Anticommutator","Multiplication","Conjugation","Slicing"]
-	SOpmapTypes = ["Chi"] # 
+	SOpmapTypes = ["SuperOp"] #
 	for matrixType in matrixTypes:
 		print("\n"+matrixType)
 		for mapType in mapTypes:

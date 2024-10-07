@@ -6,7 +6,7 @@ import TestMatrices as TM
 import sys
 np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
 
-def TPD(matrix,flag=None):
+def TPD(matrix, qBitDim, flag=None):
 	"""
 		Computes the Pauli decomposition of a square matrix.
 
@@ -19,12 +19,8 @@ def TPD(matrix,flag=None):
 	"""
 	# Array in row column convention
 	if len(matrix.shape) == 1:
-		arrayDim = matrix.shape[0]
-		matDim = int(np.sqrt(arrayDim))
-		matrix = matrix.reshape(matDim,matDim)
-
-	matDim = matrix.shape[0]
-	qBitDim = math.ceil(np.log(matDim)/np.log(2))
+		matDim = 1 << qBitDim
+		matrix = matrix.reshape(matDim, matDim)
         
 	if flag is None:
 		flag = True
@@ -33,14 +29,15 @@ def TPD(matrix,flag=None):
 	# Output for dimension 1
 
 	if qBitDim == 0:
-		decomposition = [matrix[0,0]]
+		decomposition = [matrix[0, 0]]
 		del matrix
 
 	# Calculates the tensor product coefficients via the sliced submatrices.
 	# If one of these components is zero that coefficient is ignored.
 
 	if qBitDim > 0:
-		halfDim = int(2**(qBitDim-1))
+		qBitDim -= 1
+		halfDim = 1 << qBitDim
 
 		coeff1 = 0.5*(matrix[0:halfDim, 0:halfDim]
 						+ matrix[halfDim:, halfDim:])
@@ -51,15 +48,15 @@ def TPD(matrix,flag=None):
 		coeffZ = 0.5*(matrix[0:halfDim, 0:halfDim]
 						- matrix[halfDim:, halfDim:])
 
-		coefficients = {"I": coeff1, "X": coeffX, "Y": coeffY, "Z": coeffZ}
+		coefficients = [coeff1, coeffX, coeffY, coeffZ]
 		del matrix
 
 		# Recursion for the Submatrices
 
-		for i,c in enumerate(coefficients):
-			mat = coefficients[c]
+		for coeff in coefficients:
+			mat = coeff
 			if mat.any() != 0:
-				subDec = TPD(mat,flag)
+				subDec = TPD(mat, qBitDim, flag)
 			else:
 				subDec = np.zeros(halfDim**2)
 			decomposition.extend(subDec)
@@ -67,8 +64,7 @@ def TPD(matrix,flag=None):
 		return np.array(decomposition)
 	return decomposition
 
-def iTPD(matrix,flag=None):
-	debug = False
+def iTPD(matrix, qBitDim, flag=None):
 	"""
 		Computes the inverse Pauli decomposition of a square matrix.
 
@@ -82,12 +78,9 @@ def iTPD(matrix,flag=None):
     
 	# Array in row column convention
 	if len(matrix.shape) == 1:
-		arrayDim = matrix.shape[0]
-		matDim = int(np.sqrt(arrayDim))
+		matDim = 1 << qBitDim
 		matrix = matrix.reshape(matDim,matDim)
 
-	matDim = matrix.shape[0]
-	qBitDim = math.ceil(np.log(matDim)/np.log(2))
 	if flag is None:
 		flag = True
 
@@ -95,14 +88,15 @@ def iTPD(matrix,flag=None):
 	# Output for dimension 1
 
 	if qBitDim == 0:
-		decomposition = [matrix[0,0]]
+		decomposition = [matrix[0, 0]]
 		del matrix
 
 	# Calculates the tensor product coefficients via the sliced submatrices.
 	# If one of these components is zero that coefficient is ignored.
 
 	if qBitDim > 0:
-		halfDim = int(2**(qBitDim-1))
+		qBitDim -= 1
+		halfDim = 1 << qBitDim
 
 		coeff1 = (matrix[0:halfDim, 0:halfDim]
 						+ matrix[halfDim:, halfDim:])
@@ -113,24 +107,22 @@ def iTPD(matrix,flag=None):
 		coeff4 = (matrix[0:halfDim, 0:halfDim]
 						- matrix[halfDim:, halfDim:])
 
-		coefficients = {"I": coeff1, "X": coeff2, "Y": coeff3, "Z": coeff4}
+		coefficients = [coeff1, coeff2, coeff3, coeff4]
 		del matrix
 
 		# Recursion for the Submatrices
 
-		for c in coefficients:
-			if debug: print(c)
-			mat = coefficients[c]
+		for coeff in coefficients:
+			mat = coeff
 			if mat.any() != 0:
-				subDec = iTPD(mat,flag)
+				subDec = iTPD(mat, qBitDim, flag)
 			else:
 				subDec = np.zeros(halfDim**2)
-			if debug: print(subDec.shape)
 			decomposition.extend(subDec)
-			if debug: print(decomposition)
 	if flag:
 		return np.array(decomposition)
 	return decomposition
+
 
 if __name__ == "__main__":
 	qDim = 2
