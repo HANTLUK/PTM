@@ -4,128 +4,190 @@ import math
 import TestMatrices as TM
 
 import sys
-np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
 
-def TPD(matrix, qBitDim, flag=None):
-	"""
-		Computes the Pauli decomposition of a square matrix.
+np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
-		Iteratively splits tensor factors off and decomposes those smaller
-		matrices. This is done using submatrices of the original matrix.
-		The Pauli strings are generated in each step.
 
-		Args:
-			matrix: Matrix to be decomposed
-	"""
-	# Array in row column convention
-	if len(matrix.shape) == 1:
-		matDim = 1 << qBitDim
-		matrix = matrix.reshape(matDim, matDim)
-        
-	if flag is None:
-		flag = True
+def tpd(vector, num_of_qubits):
+    if num_of_qubits == 0:
+        return np.array(vector[0])
+    else:
+        matrix_dim = 1 << num_of_qubits
+        matrix = vector.reshape(matrix_dim, matrix_dim)
+        return recursive_tpd(matrix, num_of_qubits)
 
-	decomposition = []	
-	# Output for dimension 1
 
-	if qBitDim == 0:
-		decomposition = [matrix[0, 0]]
-		del matrix
+def recursive_tpd(matrix, num_of_qubits):
+    if num_of_qubits == 0:
+        return np.array(matrix[0][0])
+    else:
+        pauli_weights: np.ndarray = np.zeros(4 ** num_of_qubits, dtype=np.complex64)
+        num_of_qubits -= 1
+        halved_dim = 1 << num_of_qubits
+        cmw_1 = 0.5 * (matrix[0:halved_dim, 0:halved_dim] + matrix[halved_dim:, halved_dim:])
+        cmw_x = 0.5 * (matrix[halved_dim:, 0:halved_dim] + matrix[0:halved_dim, halved_dim:])
+        cmw_y = -0.5j * (matrix[halved_dim:, 0:halved_dim] - matrix[0:halved_dim, halved_dim:])
+        cmw_z = 0.5 * (matrix[0:halved_dim, 0:halved_dim] - matrix[halved_dim:, halved_dim:])
+        cmws = [cmw_1, cmw_x, cmw_y, cmw_z]
 
-	# Calculates the tensor product coefficients via the sliced submatrices.
-	# If one of these components is zero that coefficient is ignored.
+        index: int = 0
+        for cmw in cmws:
+            if cmw.any() != 0:
+                pauli_weights[index:index + halved_dim ** 2] = recursive_tpd(cmw, num_of_qubits)
+            index += halved_dim ** 2
 
-	if qBitDim > 0:
-		qBitDim -= 1
-		halfDim = 1 << qBitDim
+        return pauli_weights
 
-		coeff1 = 0.5*(matrix[0:halfDim, 0:halfDim]
-						+ matrix[halfDim:, halfDim:])
-		coeffX = 0.5*(matrix[halfDim:, 0:halfDim]
-						+ matrix[0:halfDim, halfDim:])
-		coeffY = -1.j*0.5*(matrix[halfDim:, 0:halfDim]
-						- matrix[0:halfDim, halfDim:])
-		coeffZ = 0.5*(matrix[0:halfDim, 0:halfDim]
-						- matrix[halfDim:, halfDim:])
 
-		coefficients = [coeff1, coeffX, coeffY, coeffZ]
-		del matrix
+def itpd(vector, num_of_qubits):
+    if num_of_qubits == 0:
+        return np.array(vector[0])
+    else:
+        matrix_dim = 1 << num_of_qubits
+        matrix = vector.reshape(matrix_dim, matrix_dim)
+        return recursive_itpd(matrix, num_of_qubits)
 
-		# Recursion for the Submatrices
 
-		for coeff in coefficients:
-			mat = coeff
-			if mat.any() != 0:
-				subDec = TPD(mat, qBitDim, flag)
-			else:
-				subDec = np.zeros(halfDim**2)
-			decomposition.extend(subDec)
-	if flag:
-		return np.array(decomposition)
-	return decomposition
+def recursive_itpd(matrix, num_of_qubits):
+    if num_of_qubits == 0:
+        return np.array(matrix[0][0])
+    else:
+        can_weights: np.ndarray = np.zeros(4 ** num_of_qubits, dtype=np.complex64)
+        num_of_qubits -= 1
+        halved_dim = 1 << num_of_qubits
+        cmw_1 = matrix[0:halved_dim, 0:halved_dim] + matrix[halved_dim:, halved_dim:]
+        cmw_2 = matrix[halved_dim:, 0:halved_dim] + matrix[0:halved_dim, halved_dim:]
+        cmw_3 = 1.0j * (matrix[halved_dim:, 0:halved_dim] - matrix[0:halved_dim, halved_dim:])
+        cmw_4 = matrix[0:halved_dim, 0:halved_dim] - matrix[halved_dim:, halved_dim:]
+        cmws = [cmw_1, cmw_2, cmw_3, cmw_4]
+
+        index: int = 0
+        for cmw in cmws:
+            if cmw.any() != 0:
+                can_weights[index:index + halved_dim ** 2] = recursive_itpd(cmw, num_of_qubits)
+            index += halved_dim ** 2
+
+        return can_weights
+
+
+def TPD(matrix, qBitDim, flag=True):
+    """
+        Computes the Pauli decomposition of a square matrix.
+
+        Iteratively splits tensor factors off and decomposes those smaller
+        matrices. This is done using submatrices of the original matrix.
+        The Pauli strings are generated in each step.
+
+        Args:
+            matrix: Matrix to be decomposed
+    """
+    # Array in row column convention
+    if len(matrix.shape) == 1:
+        matDim = 1 << qBitDim
+        matrix = matrix.reshape(matDim, matDim)
+
+    decomposition = []
+    # Output for dimension 1
+
+    if qBitDim == 0:
+        decomposition = [matrix[0, 0]]
+        del matrix
+
+    # Calculates the tensor product coefficients via the sliced submatrices.
+    # If one of these components is zero that coefficient is ignored.
+
+    if qBitDim > 0:
+        qBitDim -= 1
+        halfDim = 1 << qBitDim
+
+        coeff1 = 0.5 * (matrix[0:halfDim, 0:halfDim]
+                        + matrix[halfDim:, halfDim:])
+        coeffX = 0.5 * (matrix[halfDim:, 0:halfDim]
+                        + matrix[0:halfDim, halfDim:])
+        coeffY = -1.j * 0.5 * (matrix[halfDim:, 0:halfDim]
+                               - matrix[0:halfDim, halfDim:])
+        coeffZ = 0.5 * (matrix[0:halfDim, 0:halfDim]
+                        - matrix[halfDim:, halfDim:])
+
+        coefficients = [coeff1, coeffX, coeffY, coeffZ]
+        del matrix
+
+        # Recursion for the Submatrices
+
+        for coeff in coefficients:
+            mat = coeff
+            if mat.any() != 0:
+                subDec = TPD(mat, qBitDim, flag)
+            else:
+                subDec = np.zeros(halfDim ** 2)
+            decomposition.extend(subDec)
+    if flag:
+        return np.array(decomposition)
+    return decomposition
+
 
 def iTPD(matrix, qBitDim, flag=None):
-	"""
-		Computes the inverse Pauli decomposition of a square matrix.
+    """
+        Computes the inverse Pauli decomposition of a square matrix.
 
-		Iteratively splits tensor factors off and decomposes those smaller
-		matrices. This is done using submatrices of the original matrix.
-		The Pauli strings are generated in each step.
+        Iteratively splits tensor factors off and decomposes those smaller
+        matrices. This is done using submatrices of the original matrix.
+        The Pauli strings are generated in each step.
 
-		Args:
-			matrix: Matrix to be decomposed
-	"""
-    
-	# Array in row column convention
-	if len(matrix.shape) == 1:
-		matDim = 1 << qBitDim
-		matrix = matrix.reshape(matDim,matDim)
+        Args:
+            matrix: Matrix to be decomposed
+    """
 
-	if flag is None:
-		flag = True
+    # Array in row column convention
+    if len(matrix.shape) == 1:
+        matDim = 1 << qBitDim
+        matrix = matrix.reshape(matDim, matDim)
 
-	decomposition = []	
-	# Output for dimension 1
+    if flag is None:
+        flag = True
 
-	if qBitDim == 0:
-		decomposition = [matrix[0, 0]]
-		del matrix
+    decomposition = []
+    # Output for dimension 1
 
-	# Calculates the tensor product coefficients via the sliced submatrices.
-	# If one of these components is zero that coefficient is ignored.
+    if qBitDim == 0:
+        decomposition = [matrix[0, 0]]
+        del matrix
 
-	if qBitDim > 0:
-		qBitDim -= 1
-		halfDim = 1 << qBitDim
+    # Calculates the tensor product coefficients via the sliced submatrices.
+    # If one of these components is zero that coefficient is ignored.
 
-		coeff1 = (matrix[0:halfDim, 0:halfDim]
-						+ matrix[halfDim:, halfDim:])
-		coeff2 = (matrix[halfDim:, 0:halfDim]
-						+matrix[0:halfDim, halfDim:])
-		coeff3 = (1.j*matrix[halfDim:, 0:halfDim]
-						-1.j*matrix[0:halfDim, halfDim:])
-		coeff4 = (matrix[0:halfDim, 0:halfDim]
-						- matrix[halfDim:, halfDim:])
+    if qBitDim > 0:
+        qBitDim -= 1
+        halfDim = 1 << qBitDim
 
-		coefficients = [coeff1, coeff2, coeff3, coeff4]
-		del matrix
+        coeff1 = (matrix[0:halfDim, 0:halfDim]
+                  + matrix[halfDim:, halfDim:])
+        coeff2 = (matrix[halfDim:, 0:halfDim]
+                  + matrix[0:halfDim, halfDim:])
+        coeff3 = (1.j * matrix[halfDim:, 0:halfDim]
+                  - 1.j * matrix[0:halfDim, halfDim:])
+        coeff4 = (matrix[0:halfDim, 0:halfDim]
+                  - matrix[halfDim:, halfDim:])
 
-		# Recursion for the Submatrices
+        coefficients = [coeff1, coeff2, coeff3, coeff4]
+        del matrix
 
-		for coeff in coefficients:
-			mat = coeff
-			if mat.any() != 0:
-				subDec = iTPD(mat, qBitDim, flag)
-			else:
-				subDec = np.zeros(halfDim**2)
-			decomposition.extend(subDec)
-	if flag:
-		return np.array(decomposition)
-	return decomposition
+        # Recursion for the Submatrices
+
+        for coeff in coefficients:
+            mat = coeff
+            if mat.any() != 0:
+                subDec = iTPD(mat, qBitDim, flag)
+            else:
+                subDec = np.zeros(halfDim ** 2)
+            decomposition.extend(subDec)
+    if flag:
+        return np.array(decomposition)
+    return decomposition
 
 
 if __name__ == "__main__":
-	qDim = 2
-	mat = TM.diagRandom(2**qDim)
-	res = iTPD(mat)
-	print(res,res.shape)
+    qDim = 2
+    mat = TM.diagRandom(2 ** qDim)
+    res = iTPD(mat, qDim)
+    print(res, res.shape)
