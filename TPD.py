@@ -8,62 +8,70 @@ import sys
 np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
 
-def tpd(vector, num_of_qubits):
+def tpd(vector: np.ndarray, num_of_qubits: int):
     if num_of_qubits == 0:
         return np.array(vector[0])
     else:
-        matrix_dim = 1 << num_of_qubits
-        matrix = vector.reshape(matrix_dim, matrix_dim)
+        matrix_dim: int = 1 << num_of_qubits
+        matrix: np.ndarray = vector.reshape(matrix_dim, matrix_dim)
         return recursive_tpd(matrix, num_of_qubits)
 
 
-def recursive_tpd(matrix, num_of_qubits):
+def recursive_tpd(matrix: np.ndarray, num_of_qubits: int):
     if num_of_qubits == 0:
         return np.array(matrix[0][0])
     else:
-        pauli_weights: np.ndarray = np.zeros(4 ** num_of_qubits, dtype=np.complex64)
+        pauli_weights: np.ndarray = np.zeros(1 << (2 * num_of_qubits), dtype=np.complex64)
         num_of_qubits -= 1
-        halved_dim = 1 << num_of_qubits
-        cmw_1 = 0.5 * (matrix[0:halved_dim, 0:halved_dim] + matrix[halved_dim:, halved_dim:])
-        cmw_x = 0.5 * (matrix[halved_dim:, 0:halved_dim] + matrix[0:halved_dim, halved_dim:])
-        cmw_y = -0.5j * (matrix[halved_dim:, 0:halved_dim] - matrix[0:halved_dim, halved_dim:])
-        cmw_z = 0.5 * (matrix[0:halved_dim, 0:halved_dim] - matrix[halved_dim:, halved_dim:])
-        cmws = [cmw_1, cmw_x, cmw_y, cmw_z]
+        halved_dim: int = 1 << num_of_qubits
+        top_left: np.ndarray = matrix[0:halved_dim, 0:halved_dim]
+        top_right: np.ndarray = matrix[0:halved_dim, halved_dim:]
+        bottom_left: np.ndarray = matrix[halved_dim:, 0:halved_dim]
+        bottom_right: np.ndarray = matrix[halved_dim:, halved_dim:]
+        cmw_1: np.ndarray = 0.5 * (top_left + bottom_right)
+        cmw_x: np.ndarray = 0.5 * (bottom_left + top_right)
+        cmw_y: np.ndarray = -0.5j * (bottom_left - top_right)
+        cmw_z: np.ndarray = 0.5 * (top_left - bottom_right)
+        cmws: list[np.ndarray] = [cmw_1, cmw_x, cmw_y, cmw_z]
 
         index: int = 0
         for cmw in cmws:
-            if cmw.any() != 0:
+            if cmw.any():
                 pauli_weights[index:index + halved_dim ** 2] = recursive_tpd(cmw, num_of_qubits)
             index += halved_dim ** 2
 
         return pauli_weights
 
 
-def itpd(vector, num_of_qubits):
+def itpd(vector: np.ndarray, num_of_qubits: int):
     if num_of_qubits == 0:
         return np.array(vector[0])
     else:
-        matrix_dim = 1 << num_of_qubits
-        matrix = vector.reshape(matrix_dim, matrix_dim)
+        matrix_dim: int = 1 << num_of_qubits
+        matrix: np.ndarray = vector.reshape(matrix_dim, matrix_dim)
         return recursive_itpd(matrix, num_of_qubits)
 
 
-def recursive_itpd(matrix, num_of_qubits):
+def recursive_itpd(matrix: np.ndarray, num_of_qubits: int):
     if num_of_qubits == 0:
         return np.array(matrix[0][0])
     else:
-        can_weights: np.ndarray = np.zeros(4 ** num_of_qubits, dtype=np.complex64)
+        can_weights: np.ndarray = np.zeros(1 << (2 * num_of_qubits), dtype=np.complex64)
         num_of_qubits -= 1
-        halved_dim = 1 << num_of_qubits
-        cmw_1 = matrix[0:halved_dim, 0:halved_dim] + matrix[halved_dim:, halved_dim:]
-        cmw_2 = matrix[halved_dim:, 0:halved_dim] + matrix[0:halved_dim, halved_dim:]
-        cmw_3 = 1.0j * (matrix[halved_dim:, 0:halved_dim] - matrix[0:halved_dim, halved_dim:])
-        cmw_4 = matrix[0:halved_dim, 0:halved_dim] - matrix[halved_dim:, halved_dim:]
-        cmws = [cmw_1, cmw_2, cmw_3, cmw_4]
+        halved_dim: int = 1 << num_of_qubits
+        top_left: np.ndarray = matrix[0:halved_dim, 0:halved_dim]
+        top_right: np.ndarray = matrix[0:halved_dim, halved_dim:]
+        bottom_left: np.ndarray = matrix[halved_dim:, 0:halved_dim]
+        bottom_right: np.ndarray = matrix[halved_dim:, halved_dim:]
+        cmw_1: np.ndarray = top_left + bottom_right
+        cmw_2: np.ndarray = bottom_left + top_right
+        cmw_3: np.ndarray = 1.0j * (bottom_left - top_right)
+        cmw_4: np.ndarray = top_left - bottom_right
+        cmws: list[np.ndarray] = [cmw_1, cmw_2, cmw_3, cmw_4]
 
         index: int = 0
         for cmw in cmws:
-            if cmw.any() != 0:
+            if cmw.any():
                 can_weights[index:index + halved_dim ** 2] = recursive_itpd(cmw, num_of_qubits)
             index += halved_dim ** 2
 
