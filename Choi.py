@@ -102,7 +102,7 @@ def PTM_Choi(matrix, midDim=None):
 	return decomposition
 
 if __name__ == "__main__":
-	qDim = 2
+	qDim = 1
 	data = TM.denseRandom(4**qDim)
 	mat = PTM_Choi(data)
 
