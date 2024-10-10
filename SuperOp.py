@@ -7,7 +7,8 @@ import TestMatrices as TM
 
 from PTM_utils import matrix_slice, matrix_embedding
 
-from TPD import tpd, itpd, TPD, iTPD
+# from TPD import tpd, itpd, TPD, iTPD
+from IterTPD import tpd, itpd
 
 from qiskit.quantum_info.operators.channel import SuperOp, PTM
 

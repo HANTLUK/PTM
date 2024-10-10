@@ -41,7 +41,7 @@ maxQdims = {"Commutator": 7,
 			"Slicing": 14,
 			"Chi": 7,
 			"SuperOp_old": 7,
-			"SuperOp": 8,
+            "SuperOp": 8,
 			"Choi": 6}
 
 
@@ -86,7 +86,7 @@ def benchmarkPlot(matrixType, mapType, maxQdim, SOp=False):
 
 
 if __name__ == "__main__":
-	matrixTypes = ["Diag", "Dense"]
+	matrixTypes = ["Dense"]
 	mapTypes = []
 	#	 ["Commutator","Anticommutator","Multiplication","Conjugation","Slicing"]
 	SOpmapTypes = ["SuperOp"]  # SuperOp_old, "Chi"
