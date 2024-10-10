@@ -1,16 +1,9 @@
 import numpy as np
-
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.quantum_info.operators import Operator, Pauli
-
-import scipy.sparse as SS
-
-import TestMatrices as TM
-
-from PTM_utils import matrix_slice, matrix_embedding
-
+import test_matrices
+from PTM_utils import matrix_slice
 import sys
-np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
+
+np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
 # Datastructure
 pauliI = [1.,np.add,[0,3]]
@@ -55,7 +48,7 @@ single_conjugation = {"II":conjII,
 						"ZZ":conjZZ}
 
 
-def PTM_conjugation(A,B=None):
+def sandwich_to_ptm(A, B=None):
 	debug = False
 	"""
 	input: two matrices A,B output PTM(A . . B^dagger)
@@ -79,7 +72,7 @@ def PTM_conjugation(A,B=None):
 				# Diagonal ones
 				restB = pauli[1](SlicesB[pauli[2][0]],SlicesB[pauli[2][1]])
 				if restB.any():
-					PTM += np.reshape(np.tensordot(np.eye(4),PTM_conjugation(restA,restB),axes=0),(PTMdim,PTMdim))
+					PTM += np.reshape(np.tensordot(np.eye(4), sandwich_to_ptm(restA, restB), axes=0), (PTMdim, PTMdim))
 				# Off-diagonal
 				for j in range(i+1,4):
 					pauliIndJ = pauliList[j]
@@ -87,13 +80,13 @@ def PTM_conjugation(A,B=None):
 					restB = pauliJ[1](SlicesB[pauliJ[2][0]],SlicesB[pauliJ[2][1]])
 					if restB.any():
 						PTMsc = single_conjugation[pauliIndI+pauliIndJ]
-						PTMrc = PTM_conjugation(restA,restB)
+						PTMrc = sandwich_to_ptm(restA, restB)
 						PTM += np.real(np.reshape(np.tensordot(PTMsc,PTMrc,axes=0),(PTMdim,PTMdim)))
 						del PTMrc,PTMsc
 	return PTM
 
 if __name__ == "__main__":
-	qDim = 1
-	data1 = TM.denseRandom(2**qDim)
-	mat = PTM_conjugation(data1)
+	num_of_qubits = 1
+	data1 = test_matrices.rand_dense_mat(2 ** num_of_qubits)
+	mat = sandwich_to_ptm(data1)
 	print(mat)

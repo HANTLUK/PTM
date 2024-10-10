@@ -1,22 +1,13 @@
 import numpy as np
-import math
-
-import scipy.sparse as SS
-
-import TestMatrices as TM
-
-from PTM_utils import matrix_slice, matrix_embedding
-
+import test_matrices
 from TPD import tpd, itpd, TPD, iTPD
-
 from qiskit.quantum_info.operators.channel import SuperOp, PTM
-
 import sys
 
 np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
 
-def PTM_SuperOp_old(matrix):
+def can_to_ptm_old(matrix):
     # matDim = matrix.shape[0]
     qBitDim = int(np.log(matrix.shape[0]) / np.log(4))
     W = np.apply_along_axis(TPD, 1, matrix, qBitDim)
@@ -24,7 +15,7 @@ def PTM_SuperOp_old(matrix):
     return PTM
 
 
-def PTM_SuperOp(matrix):
+def can_to_ptm(matrix):
     # matDim = matrix.shape[0]
     qBitDim = int(np.log(matrix.shape[0]) / np.log(4))
     W = np.apply_along_axis(tpd, 1, matrix, qBitDim)
@@ -34,9 +25,9 @@ def PTM_SuperOp(matrix):
 
 if __name__ == "__main__":
     qDim = 2
-    data = TM.denseRandom(4 ** qDim)
+    data = test_matrices.rand_dense_mat(4 ** qDim)
     print(np.array_str(data, precision=1))
-    mat = PTM_SuperOp(data)
+    mat = can_to_ptm(data)
 
     SOp = SuperOp(data)
     mat2 = PTM(SOp).data

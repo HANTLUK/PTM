@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-import TestMatrices as TM
+import test_matrices as TM
 
 import sys
 
@@ -196,6 +196,6 @@ def iTPD(matrix, qBitDim, flag=None):
 
 if __name__ == "__main__":
     qDim = 2
-    mat = TM.diagRandom(2 ** qDim)
+    mat = TM.rand_diag_mat(2 ** qDim)
     res = iTPD(mat, qDim)
     print(res, res.shape)
