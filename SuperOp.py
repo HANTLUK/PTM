@@ -1,6 +1,7 @@
 import numpy as np
 import test_matrices
 from TPD import tpd, itpd, tpd_new, itpd_new
+# from IterTPD import tpd, itpd
 from qiskit.quantum_info.operators.channel import SuperOp, PTM
 import sys
 
