@@ -16,31 +16,31 @@ from PTM_utils import matrix_slice, matrix_embedding
 import sys
 np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
 
-pauliList: list = ["I","X","Y","Z"]
+PAULI_LIST: list = ["I","X","Y","Z"]
 
-conjII = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
-conjIX = [0,1,0,0,1,0,0,0,0,0,0,1j,0,0,-1j,0]
-conjIY = [0,0,1,0,0,0,0,-1j,1,0,0,0,0,1j,0,0]
-conjIZ = [0,0,0,1,0,0,1j,0,0,-1j,0,0,1,0,0,0]
+conjII: list = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+conjIX: list = [0,1,0,0,1,0,0,0,0,0,0,1j,0,0,-1j,0]
+conjIY: list = [0,0,1,0,0,0,0,-1j,1,0,0,0,0,1j,0,0]
+conjIZ: list = [0,0,0,1,0,0,1j,0,0,-1j,0,0,1,0,0,0]
 
-conjXI = [0,1,0,0,1,0,0,0,0,0,0,-1j,0,0,1j,0]
-conjXX = [1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,-1]
-conjXY = [0,0,0,-1j,0,0,1,0,0,1,0,0,1j,0,0,0]
-conjXZ = [0,0,1j,0,0,0,0,1,-1j,0,0,0,0,1,0,0]
+conjXI: list = [0,1,0,0,1,0,0,0,0,0,0,-1j,0,0,1j,0]
+conjXX: list = [1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,-1]
+conjXY: list = [0,0,0,-1j,0,0,1,0,0,1,0,0,1j,0,0,0]
+conjXZ: list = [0,0,1j,0,0,0,0,1,-1j,0,0,0,0,1,0,0]
 
-conjYI = [0,0,1,0,0,0,0,1j,1,0,0,0,0,-1j,0,0]
-conjYX = [0,0,0,1j,0,0,1,0,0,1,0,0,-1j,0,0,0]
-conjYY = [1,0,0,0,0,-1,0,0,0,0,1,0,0,0,0,-1]
-conjYZ = [0,-1j,0,0,1j,0,0,0,0,0,0,1,0,0,1,0]
+conjYI: list = [0,0,1,0,0,0,0,1j,1,0,0,0,0,-1j,0,0]
+conjYX: list = [0,0,0,1j,0,0,1,0,0,1,0,0,-1j,0,0,0]
+conjYY: list = [1,0,0,0,0,-1,0,0,0,0,1,0,0,0,0,-1]
+conjYZ: list = [0,-1j,0,0,1j,0,0,0,0,0,0,1,0,0,1,0]
 
-conjZI = [0,0,0,1,0,0,-1j,0,0,1j,0,0,1,0,0,0]
-conjZX = [0,0,-1j,0,0,0,0,1,1j,0,0,0,0,1,0,0]
-conjZY = [0,1j,0,0,-1j,0,0,0,0,0,0,1,0,0,1,0]
-conjZZ = [1,0,0,0,0,-1,0,0,0,0,-1,0,0,0,0,1]
+conjZI: list = [0,0,0,1,0,0,-1j,0,0,1j,0,0,1,0,0,0]
+conjZX: list = [0,0,-1j,0,0,0,0,1,1j,0,0,0,0,1,0,0]
+conjZY: list = [0,1j,0,0,-1j,0,0,0,0,0,0,1,0,0,1,0]
+conjZZ: list = [1,0,0,0,0,-1,0,0,0,0,-1,0,0,0,0,1]
 
-single_conjugation = [conjII,conjIX,conjIY,conjIZ,conjXI,conjXX,conjXY,conjXZ,conjYI,conjYX,conjYY,conjYZ,conjZI,conjZX,conjZY,conjZZ]
+SINGLE_CONJUGATION: list[list] = [conjII,conjIX,conjIY,conjIZ,conjXI,conjXX,conjXY,conjXZ,conjYI,conjYX,conjYY,conjYZ,conjZI,conjZX,conjZY,conjZZ]
 
-def PTM_Chi(matrix: np.ndarray):
+def chi_to_ptm(matrix: np.ndarray):
 	matrix_dim: int = matrix.shape[0]
 	num_of_qubits: int = int((matrix_dim.bit_length() - 1)/2)
 	output_dim: int = 1 << int(2*num_of_qubits)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 	logging.basicConfig(level=logging.DEBUG)
 	qDim = 3
 	data1 = TM.denseRandom(4**qDim)
-	mat = PTM_Chi(data1)
+	mat = chi_to_ptm(data1)
 	Chi = Chi(data1)
 	mat2 = PTM(Chi).data
 	logger.info(f"{np.array_str(4**(qDim/2)*mat2-mat, precision=1)}")

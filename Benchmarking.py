@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from Commutator import commutator_to_ptm, anticommutator_to_ptm
 from Multiplication import multiplication_to_ptm
 from Conjugation import sandwich_to_ptm
-from Chi import chi_to_ptm
+from IterChi import chi_to_ptm
 from SuperOp import can_to_ptm
 from Choi import choi_to_ptm
 from PTM_utils import matrix_slice
