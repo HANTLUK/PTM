@@ -47,7 +47,6 @@ def recursive_tpd(matrix: np.ndarray, num_of_qubits: int, pauli_weights: np.ndar
     return
 
 def itpd(vector: np.ndarray, num_of_qubits: int):
-    debug = True
     if num_of_qubits == 0:
         return np.array(vector[0])
     else:
@@ -60,7 +59,6 @@ def itpd(vector: np.ndarray, num_of_qubits: int):
 
 
 def recursive_itpd(matrix: np.ndarray, num_of_qubits: int, can_weights: np.ndarray, index_outer: int = 0):
-    debug = True
     num_of_qubits -= 1
     halved_dim: int = 1 << num_of_qubits
     top_left: np.ndarray = matrix[0:halved_dim, 0:halved_dim]

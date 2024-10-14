@@ -3,6 +3,9 @@ import numpy as np
 import timeit
 import time
 
+import logging
+logger = logging.getLogger(__name__)
+
 import matplotlib.pyplot as plt
 
 from Commutator import PTM_commutator, PTM_anticommutator
@@ -39,10 +42,10 @@ maxQdims = {"Commutator": 7,
 			"Multiplication": 7,
 			"Conjugation": 5,
 			"Slicing": 14,
-			"Chi": 7,
+			"Chi": 6,
 			"SuperOp_old": 7,
             "SuperOp": 8,
-			"Choi": 6}
+			"Choi": 7}
 
 
 def benchmark(matrixType, mapType, maxQdim, SOp=False, QK=False):
@@ -52,22 +55,26 @@ def benchmark(matrixType, mapType, maxQdim, SOp=False, QK=False):
 	if SOp:
 		base = 4
 	if QK:
-		print("\n QK")
+		logger.info(f"QK")
+		logger.info(f"qubits \t time \t growth")
 		for qDim in range(1, maxQdim):
 			data = matrizes[matrixType](base ** qDim)
 			data = mapsQK[mapType](data)
 			start_time = timeit.default_timer()
 			CH.PTM(data)
 			times.append(timeit.default_timer() - start_time)
-			if output and qDim > 1: print(f"{qDim} & {times[-1]} & {times[-1] / times[-2]}")
+			if qDim > 1:
+				logger.info(f"{qDim} \t {times[-1]:.2f} \t {(times[-1] / times[-2]):.2f}")
 	else:
-		print("\n TPD")
-		for qDim in range(0, maxQdim):
+		logger.info(f"TPD")
+		logger.info(f"qubits \t time \t growth")
+		for qDim in range(1, maxQdim):
 			data = matrizes[matrixType](base ** qDim)
 			start_time = timeit.default_timer()
 			maps[mapType](data)
 			times.append(timeit.default_timer() - start_time)
-			if output and qDim > 0: print(f"{qDim} & {times[-1]} & {times[-1] / times[-2]}")
+			if qDim > 1:
+				logger.info(f"{qDim} \t {times[-1]:.2f} \t {(times[-1] / times[-2]):.2f}")
 	return times
 
 
@@ -79,24 +86,25 @@ def benchmarkPlot(matrixType, mapType, maxQdim, SOp=False):
 		ax.scatter(range(1, maxQdim), timesQK)
 		ax.set_ylim([10 ** (-6), 10 ** 3])
 	times = benchmark(matrixType, mapType, maxQdim, SOp)
-	ax.scatter(range(1, maxQdim), times[1:])
+	ax.scatter(range(1, maxQdim), times)
 	ax.set_yscale('log')
 	ax.set_title(f"PTM {mapType} {matrixType}")
 	plt.savefig(f"PlotsPTM/PTM{mapType}{matrixType}.png", dpi=150)
 
 
 if __name__ == "__main__":
-	matrixTypes = ["Dense"]
+	logging.basicConfig(level=logging.INFO)
+	matrixTypes = ["Diag", "Dense"]
 	mapTypes = []
 	#	 ["Commutator","Anticommutator","Multiplication","Conjugation","Slicing"]
-	SOpmapTypes = ["SuperOp"]  # SuperOp_old, "Chi"
+	SOpmapTypes = ["Chi"]  # SuperOp_old, "Chi"
 	for matrixType in matrixTypes:
-		print("\n" + matrixType)
+		logger.info(f"{matrixType}")
 		for mapType in mapTypes:
 			maxQdim = maxQdims[mapType]
-			print("\n" + mapType)
+			logger.info(f"{mapType}")
 			benchmarkPlot(matrixType, mapType, maxQdim)
 		for mapType in SOpmapTypes:
 			maxQdim = maxQdims[mapType]
-			print("\n" + mapType)
+			logger.info(f"{mapType}")
 			benchmarkPlot(matrixType, mapType, maxQdim, True)

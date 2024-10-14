@@ -54,13 +54,11 @@ single_conjugation = {"II":conjII,
 
 
 def PTM_Chi(matrix):
-	debug = False
 	"""
 	input: Chi matrix
 	"""
 	dim = matrix.shape[0]
 	qDim = int((dim.bit_length() - 1)/2)
-	if debug: print("Dim",qDim)
 	sliceDim = 4**(qDim - 1)
 	PTMdim = 1 << (2*qDim)
 	PTM = np.zeros((PTMdim,PTMdim),dtype=np.complex64)
@@ -69,13 +67,10 @@ def PTM_Chi(matrix):
 	else:
 		for i,pauliIndI in enumerate(pauliList):
 			for j,pauliIndJ in enumerate(pauliList):
-				if debug: print("i,j",i,j)
 				rest = matrix[i*sliceDim:(i+1)*sliceDim,j*sliceDim:(j+1)*sliceDim]
 				PTMsc = single_conjugation[pauliIndI+pauliIndJ]
-				if debug: print(PTMsc)
 				PTMrc = PTM_Chi(rest)
 				PTM += np.kron(PTMsc,PTMrc)
-				if debug: print(np.array_str(PTM, precision=1))
 				del PTMrc,PTMsc
 	return PTM
 
