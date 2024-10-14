@@ -1,13 +1,6 @@
 import numpy as np
-
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.quantum_info.operators import Operator, Pauli
-
-import scipy.sparse as SS
-
-import TestMatrices as TM
-
-from PTM_utils import matrix_slice, matrix_embedding
+import test_matrices
+from PTM_utils import matrix_slice
 
 mulI = np.eye(4)
 mulX = np.array([[0,1,0,0],[1,0,0,0],[0,0,0,1j],[0,0,-1j,0]])
@@ -24,7 +17,7 @@ paulis = {"I":pauliI,"X":pauliX,"Y":pauliY,"Z":pauliZ}
 pauliList = ["I","X","Y","Z"]
 
 
-def PTM_multiplication(matrix, factor=1.):
+def multiplication_to_ptm(matrix, factor=1.):
 	debug = False
 	"""
 	recursive anticommutators
@@ -42,7 +35,7 @@ def PTM_multiplication(matrix, factor=1.):
 			rest = pauli[1](Slices[pauli[2][0]], Slices[pauli[2][1]])
 			# Use the tensorproduct multiplication rule.
 			if rest.any():
-				PTMrm = PTM_multiplication(rest,factor*pauli[0])
+				PTMrm = multiplication_to_ptm(rest, factor * pauli[0])
 				if debug: print("PTMrm",PTMrm)
 				PTMsm = single_lmultiplication[pauliInd]
 				if debug: print("PTMsm",PTMsm)
@@ -52,7 +45,8 @@ def PTM_multiplication(matrix, factor=1.):
 
 	return PTM
 
+
 if __name__ == "__main__":
-	qDim = 7
-	data = TM.denseRandom(2**qDim)
-	PTM_multiplication(data)
+	num_of_qubits = 7
+	data = TM.rand_dense_mat(2 ** num_of_qubits)
+	multiplication_to_ptm(data)

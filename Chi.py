@@ -1,17 +1,9 @@
 import numpy as np
-
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.quantum_info.operators import Operator, Pauli
 from qiskit.quantum_info.operators.channel import Chi, PTM
-
-import scipy.sparse as SS
-
-import TestMatrices as TM
-
-from PTM_utils import matrix_slice, matrix_embedding
-
+import test_matrices
 import sys
-np.set_printoptions(suppress=True,linewidth=sys.maxsize,threshold=sys.maxsize)
+
+np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
 pauliList = ["I","X","Y","Z"]
 
@@ -53,7 +45,9 @@ single_conjugation = {"II":conjII,
 						"ZZ":conjZZ}
 
 
-def PTM_Chi(matrix):
+
+def chi_to_ptm(matrix):
+	debug = False
 	"""
 	input: Chi matrix
 	"""
@@ -69,15 +63,16 @@ def PTM_Chi(matrix):
 			for j,pauliIndJ in enumerate(pauliList):
 				rest = matrix[i*sliceDim:(i+1)*sliceDim,j*sliceDim:(j+1)*sliceDim]
 				PTMsc = single_conjugation[pauliIndI+pauliIndJ]
-				PTMrc = PTM_Chi(rest)
+				PTMrc = chi_to_ptm(rest)
 				PTM += np.kron(PTMsc,PTMrc)
 				del PTMrc,PTMsc
 	return PTM
 
+
 if __name__ == "__main__":
-	qDim = 5
-	data1 = TM.denseRandom(4**qDim)
-	mat = PTM_Chi(data1)
-	Chi = Chi(data1)
-	mat2 = PTM(Chi).data
-	print(np.array_str(4**(qDim/2)*mat2-mat, precision=1))
+	num_of_qubits = 5
+	data1 = test_matrices.rand_dense_mat(4 ** num_of_qubits)
+	mat = chi_to_ptm(data1)
+	chi_matrix = Chi(data1)
+	mat2 = PTM(chi_matrix).data
+	print(np.array_str(4 ** (num_of_qubits / 2) * mat2 - mat, precision=1))
