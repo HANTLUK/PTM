@@ -34,7 +34,8 @@ MATRICES = {"randDiag": ("random diagonal", test_matrices.rand_diag_mat),
 def benchmark(matrix_type: str, map_type: str, from_qiskit=False, verbose=False):
     times = []
     base = 4 if MAPS[map_type][2] else 2
-    print(f"|   |-> \033[4m{"Qiskit" if from_qiskit else "TPD-based"}\033[0m")
+    str_from_qiskit: str = "Qiskit" if from_qiskit else "TPD-based"
+    print(f"|   |-> \033[4m {str_from_qiskit}\033[0m")
 
     warm_up_data = MATRICES[matrix_type][1](base ** 2)
     if from_qiskit and MAPS[map_type][2]:
@@ -46,23 +47,28 @@ def benchmark(matrix_type: str, map_type: str, from_qiskit=False, verbose=False)
     for num_of_qubits in range(1, MAPS[map_type][3] + 1):
         data = MATRICES[matrix_type][1](base ** num_of_qubits)
         if from_qiskit and MAPS[map_type][2]:
-            start_time = timeit.default_timer()
+            start_time = time.perf_counter()
             data = MAPS[map_type][2](data)
             ch.PTM(data)
-            times.append(timeit.default_timer() - start_time)
+            times.append(time.perf_counter() - start_time)
         else:
-            start_time = timeit.default_timer()
+            start_time = time.perf_counter()
             MAPS[map_type][1](data)
-            times.append(timeit.default_timer() - start_time)
+            times.append(time.perf_counter() - start_time)
         if verbose:
-            print(f"|   |   {num_of_qubits}: {times[-1]}{"" if num_of_qubits == 1 else f" (x{times[-1] / times[-2]})"}")
+            str_multiplicator: str = "" if num_of_qubits == 1 else f" (x{times[-1] / times[-2]})"
+            print(f"|   |   {num_of_qubits}: {times[-1]}{str_multiplicator}")
     return times
 
 
 def benchmark_plot(matrix_type: str, map_type: str):
+    name_file: str = f"{map_type}-PTM_{matrix_type}"
     fig, ax = plt.subplots()
     ax.set_ylim([10 ** (-6), 10 ** 2])
     times = benchmark(matrix_type, map_type, verbose=True)
+    with open(f"TabsPTM/{name_file}.dat", "w") as myfile:
+        out_string: str = "".join([f"{i+1}\t {time:.5f}\n" for i,time in enumerate(times)])
+        myfile.write(f"{out_string}")
     ax.scatter(range(1, MAPS[map_type][3] + 1), times)
     ax.set_yscale('log')
     ax.set_title(f"{MAPS[map_type][0]}: {MATRICES[matrix_type][0]}")
@@ -70,12 +76,16 @@ def benchmark_plot(matrix_type: str, map_type: str):
         times_qiskit = benchmark(matrix_type, map_type, True, verbose=True)
         ax.scatter(range(1, MAPS[map_type][3] + 1), times_qiskit)
         ax.set_ylim([10 ** (-6), 10 ** 3])
-    plt.savefig(f"PlotsPTM/{map_type}-PTM_{matrix_type}.png", dpi=150)
+        with open(f"TabsPTM/{name_file}.dat", "a") as myfile:
+            out_string: str = "".join([f"{i+1}\t {time:.5f}\n" for i,time in enumerate(times)])
+            myfile.write(f"{out_string}") 
+    plt.savefig(f"PlotsPTM/{name_file}.png", dpi=150)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     MATRIX_TYPES = ["randDense"]
-    MAP_TYPES = ["Choi"]
+    MAP_TYPES = ["Can"]
     for MAT_TYPE in MATRIX_TYPES:
         print(f"\033[4m{MATRICES[MAT_TYPE][0]}\033[0m")
         for MAP_TYPE in MAP_TYPES:

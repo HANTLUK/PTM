@@ -4,98 +4,67 @@ import test_matrices
 from qiskit.quantum_info.operators.channel import Choi, PTM
 import sys
 
+import logging
+logger = logging.getLogger(__name__)
+
 np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
+def choi_to_ptm(matrix: np.ndarray):
+	matrix_dim: int = matrix.shape[0]
+	num_of_qubits: int = math.ceil(np.log(matrix_dim)/np.log(2))
+	half_qubits: int = int(num_of_qubits/2)
+	PTM: np.ndarray = np.zeros((matrix_dim,matrix_dim),dtype=np.complex64)
+	recursive_Choi(matrix, num_of_qubits, PTM, half_qubits)
+	return 2**(-half_qubits)*PTM
 
-def choi_to_ptm(matrix, midDim=None):
-    debug = False
-    """
-		Calculates CMWs for n qubits, then TPD for the rows.
-	"""
+def recursive_Choi(matrix: np.ndarray, num_of_qubits: int, PTM: np.ndarray, half_qubits: int, index_col: int=0, index_row: int=0):
+	num_of_qubits -= 1
+	halved_dim: int = 1 << num_of_qubits
+	top_left: np.ndarray = matrix[0:halved_dim, 0:halved_dim]
+	top_right: np.ndarray = matrix[0:halved_dim, halved_dim:]
+	bottom_left: np.ndarray = matrix[halved_dim:, 0:halved_dim]
+	bottom_right: np.ndarray = matrix[halved_dim:, halved_dim:]
 
-    matDim = matrix.shape[0]
-    qBitDim = math.ceil(np.log(matDim) / np.log(2))
-    halfDim = int(2 ** (qBitDim - 1))
+	if num_of_qubits >= half_qubits:
+		cmw_1: np.ndarray = top_left + bottom_right
+		cmw_2: np.ndarray = bottom_left + top_right
+		cmw_3: np.ndarray = 1.0j * (bottom_left - top_right)
+		cmw_4: np.ndarray = top_left - bottom_right
+		cmws: list[np.ndarray] = [cmw_1, cmw_2, cmw_3, cmw_4]
+		
+		col_dim: int = 1 << (num_of_qubits - half_qubits)
+		index: int = 0
+		for cmw in cmws:
+			# if cmw.any():
+			recursive_Choi(cmw, num_of_qubits,PTM,half_qubits,index_col+index)
+			index += col_dim**2
 
-    # Flag for recursion start
-    flag1 = False
-    if midDim is None:
-        flag1 = True
-        midDim = int(2 ** (qBitDim / 2))
+	elif num_of_qubits > 0:
+		cmw_1: np.ndarray = (top_left + bottom_right)
+		cmw_x: np.ndarray = (bottom_left + top_right)
+		cmw_y: np.ndarray = -1.0j * (bottom_left - top_right)
+		cmw_z: np.ndarray = (top_left - bottom_right)
+		cmws: list[np.ndarray] = [cmw_1, cmw_x, cmw_y, cmw_z]
+		
 
-    decomposition = []
+		index: int = 0
+		for cmw in cmws:
+			recursive_Choi(cmw, num_of_qubits,PTM,half_qubits,index_col,index_row+index)
+			index += halved_dim**2
+	
+	elif num_of_qubits == 0:
+		cmw_1: np.ndarray = (top_left + bottom_right)
+		cmw_x: np.ndarray = (bottom_left + top_right)
+		cmw_y: np.ndarray = -1.j * (bottom_left - top_right)
+		cmw_z: np.ndarray = (top_left - bottom_right)
+		cmws: list[np.ndarray] = [cmw_1, cmw_x, cmw_y, cmw_z]
 
-    # Output for dimension 1
-
-    if qBitDim == 0:
-        decomposition = [matrix[0, 0]]
-        del matrix
-
-    # Calculates the tensor product coefficients via the sliced submatrices.
-    # If one of these components is zero that coefficient is ignored.
-
-    if halfDim >= midDim:
-
-        coeff1 = (matrix[0:halfDim, 0:halfDim]
-                  + matrix[halfDim:, halfDim:])
-        coeffX = (matrix[halfDim:, 0:halfDim]
-                  + matrix[0:halfDim, halfDim:])
-        coeffY = (1.j * matrix[halfDim:, 0:halfDim]
-                  - 1.j * matrix[0:halfDim, halfDim:])
-        coeffZ = (matrix[0:halfDim, 0:halfDim]
-                  - matrix[halfDim:, halfDim:])
-
-        coefficients = {"I": coeff1, "X": coeffX, "Y": coeffY, "Z": coeffZ}
-        del matrix
-
-        # Recursion for the Submatrices
-
-        for i, c in enumerate(coefficients):
-            mat = coefficients[c]
-            if mat.any() != 0:
-                subDec = choi_to_ptm(mat, midDim)
-            else:
-                subDec = [[0. for _ in range(int(midDim ** 2))] for i in range(int(matDim ** 2 / midDim ** 2))]
-            if halfDim == midDim:
-                decomposition.append(subDec)
-            else:
-                decomposition.extend(subDec)
-
-    elif qBitDim > 0:
-
-        coeff1 = 0.5 * (matrix[0:halfDim, 0:halfDim]
-                        + matrix[halfDim:, halfDim:])
-        coeffX = 0.5 * (matrix[halfDim:, 0:halfDim]
-                        + matrix[0:halfDim, halfDim:])
-        coeffY = -1.j * 0.5 * (matrix[halfDim:, 0:halfDim]
-                               - matrix[0:halfDim, halfDim:])
-        coeffZ = 0.5 * (matrix[0:halfDim, 0:halfDim]
-                        - matrix[halfDim:, halfDim:])
-
-        coefficients = {"I": coeff1, "X": coeffX, "Y": coeffY, "Z": coeffZ}
-        del matrix
-
-        # Recursion for the Submatrices
-
-        for i, c in enumerate(coefficients):
-            mat = coefficients[c]
-            if mat.any() != 0:
-                subDec = choi_to_ptm(mat, midDim)
-            else:
-                subDec = [0. for _ in range(int(halfDim ** 2))]
-            if halfDim == midDim:
-                decomposition.append(subDec)
-            else:
-                decomposition.extend(subDec)
-
-    if flag1:
-        return np.array(decomposition).transpose()
-
-    return decomposition
-
+		for i,cmw in enumerate(cmws):
+			PTM[index_row+i][index_col] = cmw[0][0]
+	return
 
 if __name__ == "__main__":
-    num_of_qubits = 1
+    num_of_qubits = 2
     data = test_matrices.rand_dense_mat(4 ** num_of_qubits)
     mat = choi_to_ptm(data)
     choi_mat = Choi(data)
