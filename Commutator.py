@@ -1,94 +1,117 @@
 import numpy as np
 import test_matrices
-from PTM_utils import matrix_slice
 import sys
+
+import logging
+logger = logging.getLogger(__name__)
 
 np.set_printoptions(suppress=True, linewidth=sys.maxsize, threshold=sys.maxsize)
 
-comX = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, -1j], [0, 0, 1j, 0]])
-comY = np.array([[0, 0, 0, 0], [0, 0, 0, 1j], [0, 0, 0, 0], [0, -1j, 0, 0]])
-comZ = np.array([[0, 0, 0, 0], [0, 0, -1j, 0], [0, 1j, 0, 0], [0, 0, 0, 0]])
+comX: np.ndarray = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, -1j], [0, 0, 1j, 0]])
+comY: np.ndarray = np.array([[0, 0, 0, 0], [0, 0, 0, 1j], [0, 0, 0, 0], [0, -1j, 0, 0]])
+comZ: np.ndarray = np.array([[0, 0, 0, 0], [0, 0, -1j, 0], [0, 1j, 0, 0], [0, 0, 0, 0]])
 
-single_commutator = {"X": comX, "Y": comY, "Z": comZ}
+SINGLE_COMMUTATOR: dict = {"X": comX, "Y": comY, "Z": comZ}
 
-antiI = np.eye(4)
-antiX = np.array([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
-antiY = np.array([[0, 0, 1, 0], [0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]])
-antiZ = np.array([[0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]])
-single_anticommutator = {"I": antiI, "X": antiX, "Y": antiY, "Z": antiZ}
+antiI: np.ndarray = np.eye(4)
+antiX: np.ndarray = np.array([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+antiY: np.ndarray = np.array([[0, 0, 1, 0], [0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]])
+antiZ: np.ndarray = np.array([[0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]])
 
-# Datastructure
-pauliI = [1., np.add, [0, 3]]
-pauliX = [1., np.add, [1, 2]]
-pauliY = [1.j, np.subtract, [1, 2]]
-pauliZ = [1., np.subtract, [0, 3]]
-paulis = {"I": pauliI, "X": pauliX, "Y": pauliY, "Z": pauliZ}
-pauliList = ["I", "X", "Y", "Z"]
+SINGLE_ANTICOMMUTATOR: dict = {"I": antiI, "X": antiX, "Y": antiY, "Z": antiZ}
+
+pauliI: list = [1., np.add, [0, 3]]
+pauliX: list = [1., np.add, [1, 2]]
+pauliY: list = [1.j, np.subtract, [1, 2]]
+pauliZ: list = [1., np.subtract, [0, 3]]
+paulis: dict = {"I": pauliI, "X": pauliX, "Y": pauliY, "Z": pauliZ}
+
+PAULI_LIST: list = ["I", "X", "Y", "Z"]
 
 
-def commutator_to_ptm(matrix, factor=1.):
-    debug = False
-    """
-	recursive commutators
-	"""
-    dim = matrix.shape[0]
-    qDim = dim.bit_length() - 1
-    PTMdim = 1 << (2 * qDim)
-    PTM = np.zeros((PTMdim, PTMdim), dtype=np.complex64)
-    if qDim == 0:
-        return np.array([matrix[0][0] * factor])
-    else:
-        Slices = matrix_slice(matrix)
-        for pauliInd in pauliList:
-            pauli = paulis[pauliInd]
-            rest = pauli[1](Slices[pauli[2][0]], Slices[pauli[2][1]])
-            # Use the tensorproduct commutator rule.
-            if rest.any():
-                if pauliInd != "I":
-                    PTMra = anticommutator_to_ptm(rest, factor * 2.j * pauli[0])
-                    PTMsc = single_commutator[pauliInd]
-                    PTM += np.reshape(np.tensordot(PTMsc, PTMra, axes=0), (PTMdim, PTMdim))
-                    del PTMra, PTMsc
+def commutator_to_ptm(matrix: np.ndarray):
+    matrix_dim: int = matrix.shape[0]
+    num_of_qubits: int = matrix_dim.bit_length() - 1
+    PTM_dim: int = 1 << (2 * num_of_qubits)
+    PTM = recursive_commutator(matrix, num_of_qubits)
+    return PTM
 
-                PTMrc = commutator_to_ptm(rest, factor * 2 * pauli[0])
-                PTMsa = single_anticommutator[pauliInd]
-                PTM += np.reshape(np.tensordot(PTMsa, PTMrc, axes=0), (PTMdim, PTMdim))
-                del PTMrc, PTMsa
+def recursive_commutator(matrix: np.ndarray, num_of_qubits: int):
+    PTM_dim: int = 1 << (2*num_of_qubits)
+    PTM: np.ndarray = np.zeros((PTM_dim, PTM_dim), dtype=np.complex64)
+    if num_of_qubits == 0:
+        return matrix
+
+    num_of_qubits -= 1
+    dimension: int = 1 << num_of_qubits
+
+    top_left: np.ndarray = matrix[0:dimension, 0:dimension]
+    top_right: np.ndarray = matrix[0:dimension, dimension:]
+    bottom_left: np.ndarray = matrix[dimension:, 0:dimension]
+    bottom_right: np.ndarray = matrix[dimension:, dimension:]
+    cmw_1: np.ndarray = top_left + bottom_right
+    cmw_x: np.ndarray = bottom_left + top_right
+    cmw_y: np.ndarray = -1.0j * (bottom_left - top_right)
+    cmw_z: np.ndarray = top_left - bottom_right
+    cmws: list[np.ndarray] = [cmw_1, cmw_x, cmw_y, cmw_z]
+
+    for pauliInd,cmw in zip(PAULI_LIST,cmws):
+        if cmw.any():
+            PTM_rec_com: np.ndarray = recursive_commutator(cmw, num_of_qubits)
+            PTM_single_anti: np.ndarray = SINGLE_ANTICOMMUTATOR[pauliInd]
+            PTM += np.reshape(np.tensordot(PTM_single_anti, PTM_rec_com, axes=0), (PTM_dim, PTM_dim))
+
+            if pauliInd != "I":
+                PTM_rec_anti: np.ndarray = recursive_anticommutator(cmw, num_of_qubits)
+                PTM_single_com: np.ndarray = SINGLE_COMMUTATOR[pauliInd]
+                PTM += np.reshape(np.tensordot(PTM_single_com, PTM_rec_anti, axes=0), (PTM_dim, PTM_dim))
     return PTM
 
 
-def anticommutator_to_ptm(matrix, factor=1.):
-    """
-	recursive anticommutators
-	"""
-    dim = matrix.shape[0]
-    qDim = dim.bit_length() - 1
-    PTMdim = 1 << (2 * qDim)
-    PTM = np.zeros((PTMdim, PTMdim), dtype=np.complex64)
-    if qDim == 0:
-        return np.array([matrix[0][0] * factor])
-    else:
-        Slices = matrix_slice(matrix)
-        for pauliInd in pauliList:
-            pauli = paulis[pauliInd]
-            rest = pauli[1](Slices[pauli[2][0]], Slices[pauli[2][1]])
-            # Use the tensorproduct anticommutator rule.
-            if rest.any():
-                PTMra = anticommutator_to_ptm(rest, factor * 2. * pauli[0])
-                PTMsa = single_anticommutator[pauliInd]
-                PTM += np.reshape(np.tensordot(PTMsa, PTMra, axes=0), (PTMdim, PTMdim))
-                del PTMra, PTMsa
+def anticommutator_to_ptm(matrix: np.ndarray):
+    matrix_dim: int = matrix.shape[0]
+    num_of_qubits: int = matrix_dim.bit_length() - 1
+    PTM_dim: int = 1 << (2 * num_of_qubits)
+    PTM: np.ndarray = recursive_anticommutator(matrix, num_of_qubits)
+    return PTM
 
-                if pauliInd != "I":
-                    PTMrc = commutator_to_ptm(rest, factor * 2.j * pauli[0])
-                    PTMsc = single_commutator[pauliInd]
-                    PTM += np.reshape(np.tensordot(PTMsc, PTMrc, axes=0), (PTMdim, PTMdim))
-                    del PTMrc, PTMsc
+def recursive_anticommutator(matrix: np.ndarray, num_of_qubits: int):
+    PTM_dim: int = 1 << (2*num_of_qubits)
+    PTM: np.ndarray = np.zeros((PTM_dim, PTM_dim), dtype=np.complex64)
+
+    if num_of_qubits == 0:
+        return matrix
+
+    num_of_qubits -= 1
+    dimension: int = 1 << num_of_qubits
+
+    top_left: np.ndarray = matrix[0:dimension, 0:dimension]
+    top_right: np.ndarray = matrix[0:dimension, dimension:]
+    bottom_left: np.ndarray = matrix[dimension:, 0:dimension]
+    bottom_right: np.ndarray = matrix[dimension:, dimension:]
+    cmw_1: np.ndarray = top_left + bottom_right
+    cmw_x: np.ndarray = bottom_left + top_right
+    cmw_y: np.ndarray = -1.0j * (bottom_left - top_right)
+    cmw_z: np.ndarray = top_left - bottom_right
+    cmws: list[np.ndarray] = [cmw_1, cmw_x, cmw_y, cmw_z]
+
+    for pauliInd,cmw in zip(PAULI_LIST,cmws):
+        if cmw.any():
+            PTM_rec_anti: np.ndarray = recursive_anticommutator(cmw, num_of_qubits)
+            PTM_single_anti: np.ndarray = SINGLE_ANTICOMMUTATOR[pauliInd]
+            PTM += np.reshape(np.tensordot(PTM_single_anti, PTM_rec_anti, axes=0), (PTM_dim, PTM_dim))
+
+            if pauliInd != "I":
+                PTM_rec_com = recursive_commutator(cmw, num_of_qubits)
+                PTM_single_com = SINGLE_COMMUTATOR[pauliInd]
+                PTM += np.reshape(np.tensordot(PTM_single_com, PTM_rec_com, axes=0), (PTM_dim, PTM_dim))
+
     return PTM
 
 
 if __name__ == "__main__":
-    num_of_qubits = 1
-    data = test_matrices.rand_diag_mat(2 ** num_of_qubits)
+    logging.basicConfig(level=logging.INFO)
+    num_of_qubits = 3
+    data = test_matrices.rand_dense_mat(2 ** num_of_qubits)
     mat = commutator_to_ptm(data)
     print(mat)
