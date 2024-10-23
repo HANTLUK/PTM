@@ -67,6 +67,10 @@ set output "FigsPTM/AC-PTM.tex"
 set title "AC-PTM"
 plot  'TabsPTM/AC-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 2 ps 0.2 lc "#1188ff" ,\
 'TabsPTM/AC-PTM_randDiag_TPD.dat' using 1:2 with linespoints dashtype 7 lw 2 ps 0.2 lc "#1188ff"
+
+set xrange [0.5:9.5]
+set yrange [0.00001:1000000]
+
 # !!!_______________________________________________!!!
 #		Can-PTM
 
@@ -76,10 +80,10 @@ set output "FigsPTM/Can-PTM.tex"
 set title "Can-PTM"
 
 plot 'TabsPTM/Can-PTM_randDense_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" ps 0.2 ,\
-'TabsPTM/Can-PTM_randDense_QK_ex.dat' using 1:2:3 with filledcurves below lc rgb "#1144bb" lw 2 ,\
-'TabsPTM/Can-PTM_randDiag_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" ps 0.2 ,\
-'TabsPTM/Can-PTM_randDiag_QK_ex.dat' using 1:2:3 with filledcurves below lc rgb "#1144bb" dashtype 7 lw 2 ,\
+'TabsPTM/Can-PTM_randDense_QK_ex.dat' using 1:3 with lines lc rgb "#1144bb" lw 2 ,\
+'TabsPTM/Can-PTM_randDiag_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" dashtype 4 lw 2 ps 0.2 ,\
+'TabsPTM/Can-PTM_randDiag_QK_ex.dat' using 1:3 with lines lc rgb "#1144bb" dashtype 4 lw 2 ,\
 'TabsPTM/Can-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" ps 0.2 ,\
-'TabsPTM/Can-PTM_randDense_TPD_ex.dat' using 1:2:3 with filledcurves below lc rgb "#bb1122" lw 2 ,\
-'TabsPTM/Can-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" ps 0.2 ,\
-'TabsPTM/Can-PTM_randDiag_TPD_ex.dat' using 1:2:3 with filledcurves below lc rgb "#bb1122" dashtype 7 lw 2 ,\
+'TabsPTM/Can-PTM_randDense_TPD_ex.dat' using 1:2 with lines lc rgb "#bb1122" lw 2 ,\
+'TabsPTM/Can-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" dashtype 4 lw 2 ps 0.2 ,\
+'TabsPTM/Can-PTM_randDiag_TPD_ex.dat' using 1:2 with lines lc rgb "#bb1122" dashtype 4 lw 2 ,\
