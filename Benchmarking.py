@@ -24,7 +24,7 @@ MAPS = {"C": ("commutator to PTM", commutator_to_ptm, None, None, 7),
         "Can": ("canonical to PTM", can_to_ptm, ch.SuperOp, None, 7),
         "Chi": ("Chi to PTM", chi_to_ptm, ch.Chi, True, 7),
         "Choi": ("Choi to PTM", choi_to_ptm, ch.Choi, True, 7),
-        "Kraus": ("Kraus to PTM", None, ch.Kraus, True, 6)
+        "Kraus": ("Kraus to PTM", None, ch.Kraus, True, 7)
         }
 
 MATRICES = {"randDiag": ("random diagonal", test_matrices.rand_diag_mat),
@@ -103,11 +103,11 @@ def tabs_output(times: list, mul: list, name_file: str):
     fit_ex_times: np.ndarray = np.array([avg_const*(16.**i) for i in ran_ex])
     # Output
     with open(f"TabsPTM/{name_file}.dat", "w") as myfile:
-        out_string: str = "".join([f"{i+1}\t{time:.5f}\n" for i, time in enumerate(times)])
+        out_string: str = "".join([f"{i+1}\t{time:.7f}\n" for i, time in enumerate(times)])
         myfile.write(f"{out_string}")
     with open(f"TabsPTM/{name_file}_ex.dat", "w") as myfile:
         # num, avg_ex, max_ex, act_ex, fit_ex
-        out_string: str = "".join([f"{i+len(times)}\t{time:.5f}\t{max_time:.5f}\t{act_time:.5f}\t{fit_time:.5f}\n" for i,(time,max_time,act_time,fit_time) in enumerate(zip(ex_times,max_ex_times,act_ex_times,fit_ex_times))])
+        out_string: str = "".join([f"{i+len(times)}\t{time:.7f}\t{max_time:.7f}\t{act_time:.7f}\t{fit_time:.7f}\n" for i,(time,max_time,act_time,fit_time) in enumerate(zip(ex_times,max_ex_times,act_ex_times,fit_ex_times))])
         myfile.write(f"{out_string}")
     return
 
@@ -137,7 +137,7 @@ def benchmark_plot(matrix_type: str, map_type: str):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     MATRIX_TYPES = ["randDense", "randDiag"]
-    MAP_TYPES = ["Can"]
+    MAP_TYPES = ["Kraus","L"]
     for MAT_TYPE in MATRIX_TYPES:
         print(f"\033[4m{MATRICES[MAT_TYPE][0]}\033[0m")
         for MAP_TYPE in MAP_TYPES:
