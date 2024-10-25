@@ -137,7 +137,7 @@ def benchmark_plot(matrix_type: str, map_type: str):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     MATRIX_TYPES = ["randDense", "randDiag"]
-    MAP_TYPES = ["Kraus","L"]
+    MAP_TYPES = ["Kraus"]
     for MAT_TYPE in MATRIX_TYPES:
         print(f"\033[4m{MATRICES[MAT_TYPE][0]}\033[0m")
         for MAP_TYPE in MAP_TYPES:
