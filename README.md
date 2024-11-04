@@ -10,7 +10,7 @@ The corresponding BibTex entry is:
 &nbsp;&nbsp; author={Hantzko, Lukas and Binkowski, Lennart and Gupta, Sabhyata},  
 &nbsp;&nbsp; year={2024},  
 &nbsp;&nbsp; title={{Pauli Transfer Matrices}},  
-&nbsp;&nbsp; eprint={2411.00526},
-&nbsp;&nbsp; archivePrefix={arXiv},
-&nbsp;&nbsp; primaryClass={quant-ph}
+&nbsp;&nbsp; eprint={2411.00526},  
+&nbsp;&nbsp; archivePrefix={arXiv},  
+&nbsp;&nbsp; primaryClass={quant-ph}  
 }
