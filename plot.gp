@@ -34,7 +34,7 @@ set nokey
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/C-PTM.tex"
 
-set title "C-PTM"
+set title "\\texttt\{C-PTM\}"
 plot  'TabsPTM/C-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 lc "#1188ff" ,\
 'TabsPTM/C-PTM_randDiag_TPD.dat' using 1:2 with linespoints dashtype 4 lw 4 ps 0.6 lc "#1188ff"
 # !!!_______________________________________________!!!
@@ -43,7 +43,7 @@ plot  'TabsPTM/C-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 l
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/L-PTM.tex"
 
-set title "L-PTM"
+set title "\\texttt\{L-PTM\}"
 plot  'TabsPTM/L-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 lc "#1188ff" ,\
 'TabsPTM/L-PTM_randDiag_TPD.dat' using 1:2 with linespoints dashtype 4 lw 4 ps 0.6 lc "#1188ff"
 # !!!_______________________________________________!!!
@@ -52,7 +52,7 @@ plot  'TabsPTM/L-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 l
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/M-PTM.tex"
 
-set title "M-PTM"
+set title "\\texttt\{M-PTM\}"
 plot  'TabsPTM/M-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 lc "#1188ff" ,\
 'TabsPTM/M-PTM_randDiag_TPD.dat' using 1:2 with linespoints dashtype 4 lw 4 ps 0.6 lc "#1188ff"
 # !!!_______________________________________________!!!
@@ -61,7 +61,7 @@ plot  'TabsPTM/M-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 l
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/AC-PTM.tex"
 
-set title "AC-PTM"
+set title "\\texttt\{AC-PTM\}"
 plot  'TabsPTM/AC-PTM_randDense_TPD.dat' using 1:2 with linespoints lw 4 ps 0.6 lc "#1188ff" ,\
 'TabsPTM/AC-PTM_randDiag_TPD.dat' using 1:2 with linespoints dashtype 4 lw 4 ps 0.6 lc "#1188ff"
 
@@ -74,15 +74,15 @@ set yrange [0.00001:1000000]
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/Kraus-PTM.tex"
 
-set title "Kraus-PTM"
+set title "\\texttt\{Kraus-PTM\}"
 
 plot 'TabsPTM/Kraus-PTM_randDense_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" lw 4 ps 0.6 ,\
 'TabsPTM/Kraus-PTM_randDense_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" lw 4 ,\
 'TabsPTM/Kraus-PTM_randDiag_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Kraus-PTM_randDiag_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" dashtype 4 lw 4 ,\
-'TabsPTM/Kraus-PTM_randDense_HY.dat' using 1:2 with linespoints lc rgb "#33ff44" lw 4 ps 0.6 ,\
+'TabsPTM/Kraus-PTM_randDense_HY.dat' using 1:2 with linespoints lc rgb "#11ff88" lw 4 ps 0.6 ,\
 'TabsPTM/Kraus-PTM_randDense_HY_ex.dat' using 1:2 with lines lc rgb "#02aa35" lw 4 ,\
-'TabsPTM/Kraus-PTM_randDiag_HY.dat' using 1:2 with linespoints lc rgb "#33ff44" dashtype 4 lw 4 ps 0.6 ,\
+'TabsPTM/Kraus-PTM_randDiag_HY.dat' using 1:2 with linespoints lc rgb "#11ff88" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Kraus-PTM_randDiag_HY_ex.dat' using 1:2 with lines lc rgb "#02aa35" dashtype 4 lw 4
 
 
@@ -95,19 +95,19 @@ set yrange [0.00001:1000000]
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/Choi-PTM.tex"
 
-set title "Choi-PTM"
+set title "\\texttt\{Choi-PTM\}"
 
 plot 'TabsPTM/Choi-PTM_randDense_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" lw 4 ps 0.6 ,\
 'TabsPTM/Choi-PTM_randDense_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" lw 4 ,\
 'TabsPTM/Choi-PTM_randDiag_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Choi-PTM_randDiag_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" dashtype 4 lw 4 ,\
-'TabsPTM/Choi-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" lw 4 ps 0.6 ,\
+'TabsPTM/Choi-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff1188" lw 4 ps 0.6 ,\
 'TabsPTM/Choi-PTM_randDense_TPD_ex.dat' using 1:2 with lines lc rgb "#aa0235" lw 4 ,\
-'TabsPTM/Choi-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" dashtype 4 lw 4 ps 0.6 ,\
+'TabsPTM/Choi-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff1188" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Choi-PTM_randDiag_TPD_ex.dat' using 1:2 with lines lc rgb "#aa0235" dashtype 4 lw 4 ,\
-'TabsPTM/Choi-PTM_randDense_HY.dat' using 1:2 with linespoints lc rgb "#33ff44" lw 4 ps 0.6 ,\
+'TabsPTM/Choi-PTM_randDense_HY.dat' using 1:2 with linespoints lc rgb "#11ff88" lw 4 ps 0.6 ,\
 'TabsPTM/Choi-PTM_randDense_HY_ex.dat' using 1:2 with lines lc rgb "#02aa35" lw 4 ,\
-'TabsPTM/Choi-PTM_randDiag_HY.dat' using 1:2 with linespoints lc rgb "#33ff44" dashtype 4 lw 4 ps 0.6 ,\
+'TabsPTM/Choi-PTM_randDiag_HY.dat' using 1:2 with linespoints lc rgb "#11ff88" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Choi-PTM_randDiag_HY_ex.dat' using 1:2 with lines lc rgb "#02aa35" dashtype 4 lw 4
 
 set xrange [0.9:9.1]
@@ -119,19 +119,19 @@ set yrange [0.00001:1000000]
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/Chi-PTM.tex"
 
-set title "Chi-PTM"
+set title "\\texttt\{Chi-PTM\}"
 
 plot 'TabsPTM/Chi-PTM_randDense_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" lw 4 ps 0.6 ,\
 'TabsPTM/Chi-PTM_randDense_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" lw 4 ,\
 'TabsPTM/Chi-PTM_randDiag_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Chi-PTM_randDiag_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" dashtype 4 lw 4 ,\
-'TabsPTM/Chi-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" lw 4 ps 0.6 ,\
+'TabsPTM/Chi-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff1188" lw 4 ps 0.6 ,\
 'TabsPTM/Chi-PTM_randDense_TPD_ex.dat' using 1:2 with lines lc rgb "#aa0235" lw 4 ,\
-'TabsPTM/Chi-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" dashtype 4 lw 4 ps 0.6 ,\
+'TabsPTM/Chi-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff1188" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Chi-PTM_randDiag_TPD_ex.dat' using 1:2 with lines lc rgb "#aa0235" dashtype 4 lw 4 ,\
-'TabsPTM/Chi-PTM_randDense_HY.dat' using 1:2 with linespoints lc rgb "#33ff44" lw 4 ps 0.6 ,\
+'TabsPTM/Chi-PTM_randDense_HY.dat' using 1:2 with linespoints lc rgb "#11ff88" lw 4 ps 0.6 ,\
 'TabsPTM/Chi-PTM_randDense_HY_ex.dat' using 1:2 with lines lc rgb "#02aa35" lw 4 ,\
-'TabsPTM/Chi-PTM_randDiag_HY.dat' using 1:2 with linespoints lc rgb "#33ff44" dashtype 4 lw 4 ps 0.6 ,\
+'TabsPTM/Chi-PTM_randDiag_HY.dat' using 1:2 with linespoints lc rgb "#11ff88" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Chi-PTM_randDiag_HY_ex.dat' using 1:2 with lines lc rgb "#02aa35" dashtype 4 lw 4
 
 
@@ -144,13 +144,13 @@ set yrange [0.00001:1000000]
 set term cairolatex pdf size 8cm, 8cm color colortext font ",8"
 set output "FigsPTM/Can-PTM.tex"
 
-set title "Can-PTM"
+set title "\\texttt\{Can-PTM\}"
 
 plot 'TabsPTM/Can-PTM_randDense_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" lw 4 ps 0.6 ,\
 'TabsPTM/Can-PTM_randDense_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" lw 4 ,\
 'TabsPTM/Can-PTM_randDiag_QK.dat' using 1:2 with linespoints lc rgb "#1188ff" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Can-PTM_randDiag_QK_ex.dat' using 1:3 with lines lc rgb "#0235aa" dashtype 4 lw 4 ,\
-'TabsPTM/Can-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" lw 4 ps 0.6 ,\
+'TabsPTM/Can-PTM_randDense_TPD.dat' using 1:2 with linespoints lc rgb "#ff1188" lw 4 ps 0.6 ,\
 'TabsPTM/Can-PTM_randDense_TPD_ex.dat' using 1:2 with lines lc rgb "#aa0235" lw 4 ,\
-'TabsPTM/Can-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff3344" dashtype 4 lw 4 ps 0.6 ,\
+'TabsPTM/Can-PTM_randDiag_TPD.dat' using 1:2 with linespoints lc rgb "#ff1188" dashtype 4 lw 4 ps 0.6 ,\
 'TabsPTM/Can-PTM_randDiag_TPD_ex.dat' using 1:2 with lines lc rgb "#aa0235" dashtype 4 lw 4
