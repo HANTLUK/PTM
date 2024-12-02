@@ -50,7 +50,7 @@ def recursive_multiplication(matrix: np.ndarray, num_of_qubits: int, factor: flo
         if cmw.any():
             PTM_rec_mul: np.ndarray = recursive_multiplication(cmw, num_of_qubits, factor * pauli[0])
             PTM_single_mul: np.ndarray = SINGLE_LMULTIPLICATION[pauliInd]
-            PTM += np.reshape(np.tensordot(PTM_single_mul,PTM_rec_mul,axes=0),(PTM_dim,PTM_dim))
+            PTM += np.kron(PTM_single_mul,PTM_rec_mul)
     return PTM
 
 

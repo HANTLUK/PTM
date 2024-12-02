@@ -95,7 +95,7 @@ def recursive_sandwich(A: np.ndarray, B: np.ndarray, num_of_qubits: int):
                 if sc_any(cmw_B):
                     PTMsc: np.ndarray = SINGLE_CONJUGATION[indexA+indexB]
                     PTMrc: np.ndarray = recursive_sandwich(cmw_A,cmw_B, num_of_qubits)
-                    PTM += np.real(np.reshape(np.tensordot(PTMsc,PTMrc,axes=0),(PTM_dim,PTM_dim)))
+                    PTM += np.real(np.kron(PTMsc,PTMrc))
     return PTM
 
 if __name__ == "__main__":

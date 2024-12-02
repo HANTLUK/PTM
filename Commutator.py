@@ -40,7 +40,7 @@ def recursive_commutator(matrix: np.ndarray, num_of_qubits: int):
     PTM_dim: int = 1 << (2*num_of_qubits)
     PTM: np.ndarray = np.zeros((PTM_dim, PTM_dim), dtype=np.complex64)
     if num_of_qubits == 0:
-        return matrix
+        return np.array([0.])
 
     num_of_qubits -= 1
     dimension: int = 1 << num_of_qubits
@@ -59,12 +59,12 @@ def recursive_commutator(matrix: np.ndarray, num_of_qubits: int):
         if cmw.any():
             PTM_rec_com: np.ndarray = recursive_commutator(cmw, num_of_qubits)
             PTM_single_anti: np.ndarray = SINGLE_ANTICOMMUTATOR[pauliInd]
-            PTM += np.reshape(np.tensordot(PTM_single_anti, PTM_rec_com, axes=0), (PTM_dim, PTM_dim))
+            PTM += np.kron(PTM_single_anti, PTM_rec_com)
 
             if pauliInd != "I":
                 PTM_rec_anti: np.ndarray = recursive_anticommutator(cmw, num_of_qubits)
                 PTM_single_com: np.ndarray = SINGLE_COMMUTATOR[pauliInd]
-                PTM += np.reshape(np.tensordot(PTM_single_com, PTM_rec_anti, axes=0), (PTM_dim, PTM_dim))
+                PTM += np.kron(PTM_single_com, PTM_rec_anti)
     return PTM
 
 
@@ -99,12 +99,12 @@ def recursive_anticommutator(matrix: np.ndarray, num_of_qubits: int):
         if cmw.any():
             PTM_rec_anti: np.ndarray = recursive_anticommutator(cmw, num_of_qubits)
             PTM_single_anti: np.ndarray = SINGLE_ANTICOMMUTATOR[pauliInd]
-            PTM += np.reshape(np.tensordot(PTM_single_anti, PTM_rec_anti, axes=0), (PTM_dim, PTM_dim))
+            PTM += np.kron(PTM_single_anti, PTM_rec_anti)
 
             if pauliInd != "I":
                 PTM_rec_com = recursive_commutator(cmw, num_of_qubits)
                 PTM_single_com = SINGLE_COMMUTATOR[pauliInd]
-                PTM += np.reshape(np.tensordot(PTM_single_com, PTM_rec_com, axes=0), (PTM_dim, PTM_dim))
+                PTM += np.kron(PTM_single_com, PTM_rec_com)
 
     return PTM
 
