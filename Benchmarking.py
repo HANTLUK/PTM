@@ -60,7 +60,7 @@ def benchmark(matrix_type: str, map_type: str, from_qiskit=False, hybrid=False, 
     for num_of_qubits in range(1, MAPS[map_type][4] + 1):
         data = MATRICES[matrix_type][1](base ** num_of_qubits)
         if map_type == "Kraus":
-            warm_up_data: list[np.ndarray] = [MATRICES[matrix_type][1](base ** 2) for i in range(2)]
+            warm_up_data: list[np.ndarray] = [MATRICES[matrix_type][1](base ** num_of_qubits) for i in range(2)]
 
         if from_qiskit and MAPS[map_type][2]:
             start_time = time.perf_counter()
