@@ -21,3 +21,9 @@ The corresponding BibTex entry is:
   urldate = {2025-07-17},
   copyright = {https://creativecommons.org/licenses/by/4.0/}
 }
+
+## Benchmarking.py
+Run this file to create the Benchmarks as plots or as tables for gnuplot (make tabs).
+
+## plot.gp
+Run this file to create the Figures of the paper (make plots).
